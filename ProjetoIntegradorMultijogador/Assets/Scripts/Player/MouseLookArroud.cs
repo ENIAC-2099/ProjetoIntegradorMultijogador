@@ -4,15 +4,33 @@ using UnityEngine;
 
 public class MouseLookArroud : MonoBehaviour
 {
-    float rotationX = 0f;
-    float rotationY = 0f;
+    public float mouseSensitivity = 100f;
+    public Transform playerBody;
 
-    float sensitivity = 15f;
+    float xRotation;
+
+
+    private void Start()
+    {
+        // some com o ponteiro do mouse
+        Cursor.lockState = CursorLockMode.Locked; 
+    }
 
     void Update()
     {
-        rotationY += Input.GetAxis("Mouse X") * sensitivity;
-        rotationX += Input.GetAxis("Mouse Y") * -1 * sensitivity;
-        transform.localEulerAngles = new Vector3(rotationX, rotationY, 0f);
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+
+        //impedir de mexer no eixo y
+        xRotation -= mouseY;
+
+        //limitar rotação da camera 
+        xRotation = Mathf.Clamp(xRotation, -90, 90);
+
+        //movimentação da camera
+        transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
+
+        //rotacionar o corpo no eixou y com a camera 
+        playerBody.Rotate(Vector3.up * mouseX); 
     }
 }

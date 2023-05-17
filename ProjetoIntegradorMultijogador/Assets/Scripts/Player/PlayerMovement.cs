@@ -4,17 +4,65 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    //Atributos Player
+    public CharacterController controller;
+    public float speed = 6f;
+    public float gravity = -10f;
+    public float jumpHeight;
+    public float runningSpeed = 12f; 
+
+
+    //Checar Chão
+    public Transform groundCheck;
+    public float groundDistance;
+    public LayerMask groundMask; 
+
+    //Variaveis privadas
+    Vector3 velocity;
+    bool isGrounded;
+    float initialSpeed; 
+
+    private void Start()
+    {
+        initialSpeed = speed; 
+    }
+
     private void Update()
     {
-        Vector3 moveDir = new Vector3(0, 0, 0);
+        //Checagem do chão 
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        if (Input.GetKey(KeyCode.W)) moveDir.z = +1f;
-        if (Input.GetKey(KeyCode.S)) moveDir.z = -1f;
-        if (Input.GetKey(KeyCode.A)) moveDir.x = -1f;
-        if (Input.GetKey(KeyCode.D)) moveDir.x = +1f;
+        //Aplicação da gravidade
+        if(isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f; 
+        }
 
-        float moveSpeed = 3f;
-        transform.position += moveDir * moveSpeed * Time.deltaTime;
+        //Correndo
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            speed = runningSpeed;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            speed = initialSpeed; 
+        }
 
+        //Pulo
+        if(Input.GetButtonDown("Jump") && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity); 
+        }
+
+        float moveX = Input.GetAxis("Horizontal");
+        float moveZ = Input.GetAxis("Vertical");
+
+        Vector3 move = transform.right * moveX + transform.forward * moveZ;
+
+        controller.Move(move * speed * Time.deltaTime);
+
+        velocity.y += gravity * Time.deltaTime;
+
+        controller.Move(velocity * Time.deltaTime);
     }
 }
